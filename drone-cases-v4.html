@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="ru"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Дрон-кейсы</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--bg:#10131a;--card:#1a1f2b;--tx:#e8ecf4;--mu:#8a93a6}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]){--bg:#eef1f6;--card:#fff;--tx:#161b26;--mu:#5b6578}}
+*{box-sizing:border-box}
+body{margin:0 auto;background:var(--bg);color:var(--tx);font-family:system-ui,Arial,sans-serif;padding:12px;max-width:980px}
+h1{font-size:22px;margin:4px 0 10px}h2{font-size:16px;margin:16px 0 8px}
+.bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;background:var(--card);padding:10px;border-radius:12px;position:sticky;top:0;z-index:5}
+.money{font-size:20px;font-weight:700;color:#4ade80;flex:1;min-width:150px}
+button{background:#3b82f6;color:#fff;border:0;border-radius:8px;padding:8px 11px;font-size:14px;cursor:pointer}
+button:disabled{opacity:.4;cursor:not-allowed}button.g{background:#16a34a}button.r{background:#dc2626}button.y{background:#ca8a04}button.p{background:#7c3aed}button.t{background:#334155}
+input,select{padding:9px;border-radius:8px;border:1px solid #555;background:var(--card);color:var(--tx);font-size:15px;width:100%;margin:4px 0}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px}
+.c{background:var(--card);border-radius:12px;padding:12px;border:2px solid #333}
+.c .e{font-size:38px;text-align:center}.c small{color:var(--mu)}
+.im{width:84px;height:84px;display:block;margin:0 auto 4px}
+.row{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;align-items:center}
+.drop{animation:pop .4s}@keyframes pop{from{transform:scale(.3) rotate(-10deg);opacity:0}to{transform:none;opacity:1}}
+.spin{font-size:40px;animation:sp .3s linear infinite}@keyframes sp{50%{transform:scale(1.3)}}
+.r0{border-color:#9ca3af}.r1{border-color:#3b82f6}.r2{border-color:#a855f7}.r3{border-color:#eab308;box-shadow:0 0 10px #eab30866}.r4{border-color:#ef4444;box-shadow:0 0 16px #ef4444aa}.r5{border-color:#22d3ee;box-shadow:0 0 22px #22d3eecc}
+.t0{color:#9ca3af}.t1{color:#3b82f6}.t2{color:#a855f7}.t3{color:#eab308}.t4{color:#ef4444}.t5{color:#22d3ee}
+#auth{max-width:340px;margin:40px auto;background:var(--card);padding:18px;border-radius:14px}
+#msg{color:#f87171;font-size:13px;min-height:18px}
+.top{background:var(--card);border-radius:12px;padding:10px;margin-top:8px}
+#arena{position:relative;height:260px;background:var(--card);border-radius:12px;overflow:hidden;margin-top:8px}
+#tg{position:absolute;font-size:26px;padding:4px 8px}
+.big{font-size:34px;text-align:center;padding:10px}
+</style></head><body>
+<div id="auth">
+<h1>🛸 Дрон-кейсы</h1>
+<input id="u" placeholder="Логин" maxlength="16" autocomplete="username">
+<input id="p" placeholder="Пароль" type="password" autocomplete="current-password">
+<div id="msg"></div>
+<div class="row"><button onclick="login()">Войти</button><button class="g" onclick="reg()">Создать аккаунт</button></div>
+<p style="color:var(--mu);font-size:12px">Аккаунты хранятся только в этом браузере. Деньги виртуальные.</p>
+</div>
+
+<div id="game" hidden>
+<h1>🛸 Дрон-кейсы</h1>
+<div class="bar"><div class="money" id="money"></div>
+<button class="y" onclick="work()">💼 +300₽</button><button class="g" id="bb" onclick="bonus()">🎁</button>
+<button class="p" onclick="showTop()">🏆 Рейтинг</button>
+<button onclick="logout()" id="who"></button></div>
+<div id="top" class="top" hidden></div>
+<div class="tabs" id="tabs"></div>
+
+<div id="s0"><h2>🛒 Магазин кейсов</h2><div class="grid" id="shop"></div>
+<h2>🎰 Выпало</h2><div class="grid" id="res"></div></div>
+
+<div id="s1" hidden><h2>🎒 Мои кейсы</h2><div class="grid" id="mycases"></div>
+<h2>🛸 Мои дроны</h2>
+<div class="row"><button class="g" onclick="sellAll()">Продать всё (без прокачанных)</button>
+<span>🤖 Авто-прокачка до ур.</span><select id="au" style="width:auto" onchange="S.auto=+this.value;render()"><option value="0">выкл</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select></div>
+<div class="grid" id="inv" style="margin-top:10px"></div></div>
+
+<div id="s2" hidden></div>
+<div id="s3" hidden></div>
+
+<div id="s4" hidden>
+<h2>🎯 Дрон-охота (10 сек, +150₽ за дрона)</h2>
+<button onclick="hunt()" id="hb">Старт</button> <span id="hs"></span>
+<div id="arena"></div>
+<h2>⚡ Реакция (быстрее — больше денег, фальстарт −500₽)</h2>
+<button id="rb" class="r" onclick="react()">Старт</button> <span id="rs"></span>
+</div>
+
+<div id="s5" hidden>
+<h2>🎰 Казино — спускай всё!</h2>
+<input id="bet" type="number" min="1" value="1000" placeholder="Ставка">
+<div class="row"><button class="t" onclick="$('bet').value=1000">1 000</button><button class="t" onclick="$('bet').value=10000">10 000</button><button class="t" onclick="$('bet').value=100000">100 000</button><button class="r" onclick="$('bet').value=S.m">🔥 ВА-БАНК</button></div>
+<div class="big" id="cres">🎰</div>
+<div class="row"><button class="y" onclick="slots()">🎰 Слоты</button><button class="p" id="cb" onclick="crash()">📈 Краш</button><button onclick="flip()">🪙 Орёл/Решка (x2)</button>
+<button class="r" onclick="roul('r')">🔴 Красное x2</button><button class="t" onclick="roul('b')">⚫ Чёрное x2</button><button class="g" onclick="roul('z')">🟢 Зеро x14</button></div>
+</div>
+<p style="color:var(--mu);font-size:12px">Игра ненастоящая, деньги виртуальные 🙂</p>
+</div>
+
+<script>
+const RN=["Обычный","Редкий","Эпический","Легендарный","Мифический","Секретный"];
+const RAW=[
+"Мини-дрон|150|q|#9ca3af;Игрушечный квадрик|200|q|#60a5fa;Дрон-самолётик|250|p|#fbbf24;Школьный дрон|180|q|#34d399;Дрон-светлячок|300|q|#a3e635;Бумажный планер|120|p|#e5e7eb;Дрон-шмель|220|q|#facc15;Дрон-комар|100|q|#a8a29e;Дрон-воробей|140|p|#d6a35c;Дрон-леденец|260|q|#f472b6;Дрон-пузырь|160|q|#7dd3fc;Дрон-тапок|90|q|#c084fc",
+"Курьерский дрон|1500|b|#f59e0b;Дрон-фотограф|2500|q|#38bdf8;Садовый опрыскиватель|2000|q|#4ade80;Дрон-спасатель|3000|h|#f87171;DJI Mini|3500|q|#94a3b8;Дрон-пчела|2200|q|#fde047;Дрон-почтальон|2800|b|#fb923c;Дрон-пицца|2600|b|#ef4444;Дрон-садовник|1800|q|#22c55e;Дрон-рыболов|3200|q|#0891b2;Курьер Pro|4000|b|#eab308;Дрон-полицейский|3800|q|#1d4ed8",
+"FPV-гонщик|9000|q|#ef4444;Грузовой дрон|15000|b|#78716c;DJI Mavic|12000|q|#475569;Дрон-пожарный|18000|h|#dc2626;Патрульный дрон|11000|q|#2563eb;Дрон-картограф|13000|p|#0ea5e9;Дрон-вертолётик|16000|h|#8b5cf6;Дрон-геодезист|14000|p|#14b8a6;Дрон-шторм|17000|q|#6366f1;Дрон-инспектор|12500|h|#f59e0b;Дрон-ковш|19000|b|#a16207;Дрон-вихрь|15500|q|#ec4899",
+"Орлан-10|60000|p|#84cc16;Байрактар TB2|90000|p|#94a3b8;Ланцет|75000|d|#a16207;Шахед-136|120000|d|#6b7280;Predator MQ-1|100000|p|#64748b;Switchblade|85000|d|#57534e;Гепард-3|110000|d|#ca8a04;Орлан-30|130000|p|#65a30d;Гермес-900|140000|p|#cbd5e1;Lancet-3М|150000|d|#b45309;Резидент|95000|w|#334155;Дрон-цербер|160000|h|#7f1d1d",
+"Герань-2|300000|d|#374151;Герань-5|400000|d|#4b5563;Лютый Шахед|500000|d|#b91c1c;MQ-9 Reaper|450000|p|#1f2937;Охотник С-70|600000|p|#0f172a;Тёмный Ворон|550000|d|#3b0764;Огненный Ланцет|480000|d|#ea580c;Герань-3|350000|d|#1e293b;Герань-4|420000|d|#475569;Скат|700000|w|#0f172a;Огненный Феникс|650000|w|#f97316;Грозовой Шахед|800000|d|#0369a1",
+"Космический Шахед|2000000|d|#06b6d4;Золотая Герань|3000000|d|#fbbf24;Квантовый дрон|5000000|q|#a855f7;ЛЮТАЯ ГЕРАНЬ-5|8000000|d|#ef4444;Призрак Вселенной|12000000|p|#e879f9;Герань-5 ULTRA|15000000|d|#f43f5e;Тёмная Материя|20000000|w|#7c3aed;Звёздный Шахед|30000000|r|#38bdf8;БОГ ДРОНОВ|100000000|r|#facc15"];
+const D=RAW.map((s,r)=>s.split(";").map(x=>{const a=x.split("|");return{n:a[0],v:+a[1],s:a[2],c:a[3],r}}));
+const NM={};D.forEach(a=>a.forEach(d=>NM[d.n]=d));
+const CASES=[
+{n:"Стартовый",p:500,e:"📦",w:[70,22,6,1.8,.2,0]},
+{n:"Городской",p:2000,e:"🏙️",w:[55,30,11,3.5,.5,0]},
+{n:"Про",p:5000,e:"🎁",w:[40,32,20,6.5,1.4,.1]},
+{n:"Военный",p:15000,e:"🪖",w:[25,32,28,11,3.5,.5]},
+{n:"Элитный",p:40000,e:"💎",w:[10,25,35,21,8,1]},
+{n:"Золотой",p:150000,e:"🏆",w:[0,10,35,35,17,3]},
+{n:"Космос",p:1000000,e:"🌠",w:[0,0,15,40,35,10]},
+{n:"Алмазный",p:3000000,e:"💠",w:[0,0,8,36,40,16]},
+{n:"Шахед-бокс",p:8000000,e:"⚡",w:[0,0,0,35,45,20]},
+{n:"Секретный",p:25000000,e:"🕵️",w:[0,0,0,20,50,30]},
+{n:"Легенда",p:100000000,e:"👑",w:[0,0,0,0,40,60]}];
+const CARS=[["Ока",40000,"🚗"],["Жигули",120000,"🚙"],["Lada Vesta",800000,"🚘"],["Toyota Camry",2000000,"🚖"],["BMW M5",6000000,"🏎️"],["Ferrari",25000000,"🏎️"]];
+const UP=[.9,.75,.6,.45,.3],MAXL=5,APT=2000000,APTS=1500000,RENT=300;
+let U={},cur=null,S=null,busy=false,mem={},T=0,OF=[],CM=[],tk=0;
+function ld(k){try{return localStorage.getItem(k)}catch(e){return mem[k]||null}}
+function st(k,v){try{localStorage.setItem(k,v)}catch(e){mem[k]=v}}
+try{U=JSON.parse(ld("dc_users")||"{}")}catch(e){U={}}
+const $=id=>document.getElementById(id);
+const f=n=>Math.round(n).toLocaleString("ru")+" ₽";
+const price=d=>Math.round(d.v*(1+d.l*.6));
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const hs=s=>{let x=5381;for(const c of s)x=((x*33)^c.charCodeAt(0))>>>0;return x.toString(36)};
+const fresh=()=>({m:10000,apt:1,inv:[],cs:CASES.map(()=>0),cars:[],wr:[],bt:0,auto:0,id:1});
+function persist(){if(cur){U[cur].s=S}st("dc_users",JSON.stringify(U))}
+function msg(t){$("msg").textContent=t}
+const sd=(h,k)=>"#"+[1,3,5].map(j=>Math.max(0,Math.min(255,Math.round(parseInt(h.substr(j,2),16)*k))).toString(16).padStart(2,"0")).join("");
+let gid=0;const RC=["#9ca3af","#3b82f6","#a855f7","#eab308","#ef4444","#22d3ee"];
+function img(n){const t=NM[n]||{s:"q",c:"#9ca3af",r:0},c=t.c,i="g"+(gid++),k="#0b0f17";
+ const F=`fill="url(#${i})" stroke="${k}" stroke-width="1.5" stroke-linejoin="round"`;let g="";
+ if(t.s=="p")g=`<path d="M26 32L13 5h9l17 26zM26 32L13 59h9l17-26z" ${F}/><path d="M9 32L2 21h7l7 10zM9 32L2 43h7l7-10z" ${F}/><ellipse cx="32" cy="32" rx="27" ry="4.5" ${F}/><ellipse cx="42" cy="31.5" rx="7" ry="2" fill="#bde4ff" opacity=".8"/><circle cx="58" cy="32" r="2.2" fill="${k}"/>`;
+ else if(t.s=="d")g=`<path d="M32 3L61 57L45 51L32 59L19 51L3 57Z" ${F}/><path d="M32 3V59" stroke="${k}" stroke-opacity=".5"/><path d="M32 8L46 40L32 34L18 40Z" fill="#fff" opacity=".18"/><rect x="28" y="56" width="8" height="6" rx="1.5" fill="${k}"/>`;
+ else if(t.s=="w")g=`<path d="M32 5L62 46L46 41L32 54L18 41L2 46Z" ${F}/><ellipse cx="32" cy="24" rx="4" ry="8" fill="${k}" opacity=".55"/><path d="M32 5L38 30L32 26L26 30Z" fill="#fff" opacity=".2"/>`;
+ else if(t.s=="h")g=`<path d="M40 33H62L60 38H40z" ${F}/><ellipse cx="28" cy="35" rx="19" ry="12" ${F}/><path d="M16 33Q22 24 34 27L36 38L14 40Z" fill="#bde4ff" opacity=".75"/><ellipse cx="28" cy="18" rx="28" ry="3" fill="#fff" opacity=".35" stroke="${k}"/><path d="M28 18V24" stroke="${k}" stroke-width="3"/><path d="M12 50H46M18 46V50M38 46V50" stroke="${k}" stroke-width="2.5"/>`;
+ else if(t.s=="r")g=`<path d="M23 40L10 56L24 50zM41 40L54 56L40 50z" ${F}/><path d="M32 3C43 13 43 34 41 48H23C21 34 21 13 32 3Z" ${F}/><circle cx="32" cy="24" r="5" fill="#bde4ff" stroke="${k}"/><path d="M27 50Q32 64 37 50Z" fill="#fb923c"/>`;
+ else{g=`<path d="M13 13L51 51M51 13L13 51" stroke="${k}" stroke-width="4" stroke-linecap="round"/>`+[[13,13],[51,13],[13,51],[51,51]].map(p=>`<ellipse cx="${p[0]}" cy="${p[1]}" rx="11" ry="4.5" fill="${c}" opacity=".35" stroke="${k}" stroke-width=".8"/><circle cx="${p[0]}" cy="${p[1]}" r="3" fill="${k}"/>`).join("")+`<rect x="22" y="22" width="20" height="20" rx="6" ${F}/><circle cx="32" cy="32" r="5" fill="${k}"/><circle cx="30.5" cy="30.5" r="1.8" fill="#9bdcff"/>`;
+  if(t.s=="b")g+=`<rect x="22" y="44" width="20" height="13" rx="2" fill="#a16d3a" stroke="${k}"/><path d="M22 50.5H42" stroke="${k}" opacity=".5"/>`}
+ return `<svg class="im" viewBox="0 0 64 64"><defs><linearGradient id="${i}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${sd(c,1.3)}"/><stop offset="1" stop-color="${sd(c,.55)}"/></linearGradient></defs><circle cx="32" cy="32" r="31" fill="${RC[t.r]}" opacity=".13" stroke="${RC[t.r]}" stroke-opacity=".4"/>${g}</svg>`}
+function reg(){const n=$("u").value.trim(),p=$("p").value;
+ if(n.length<2)return msg("Логин минимум 2 символа");
+ if(p.length<3)return msg("Пароль минимум 3 символа");
+ if(U[n])return msg("Такой логин уже занят");
+ U[n]={h:hs(n+p),s:fresh()};enter(n)}
+function login(){const n=$("u").value.trim(),p=$("p").value;
+ if(!U[n]||U[n].h!==hs(n+p))return msg("Неверный логин или пароль");enter(n)}
+function enter(n){cur=n;S=U[n].s;const d=fresh();
+ for(const k in d)if(S[k]===undefined)S[k]=d[k];
+ while(S.cs.length<CASES.length)S.cs.push(0);
+ st("dc_cur",n);genOF();genCM();genWM();$("auth").hidden=true;$("game").hidden=false;$("p").value="";msg("");tab(0);render()}
+function logout(){persist();cur=null;S=null;st("dc_cur","");$("game").hidden=true;$("auth").hidden=false}
+function tab(i){T=i;for(let k=0;k<6;k++)$("s"+k).hidden=k!=i;
+ $("tabs").innerHTML=["🛒 Магазин","🎒 Инвентарь","🔁 Трейды","🏠🚗 Бизнес","🎮 Игры","🎰 Казино"].map((t,k)=>`<button class="${k==i?"":"t"}" onclick="tab(${k})">${t}</button>`).join("")}
+function roll(w){let x=Math.random()*w.reduce((a,b)=>a+b),i=0;
+ for(;i<w.length-1;i++){if(x<w[i])break;x-=w[i]}return i}
+function mk(t){return{id:S.id++,n:t.n,r:t.r,v:t.v,l:0}}
+function buy(ci,n){const c=CASES[ci];if(S.m<c.p*n)return false;S.m-=c.p*n;S.cs[ci]+=n;render();return true}
+function buyOpen(ci){if(busy)return;if(buy(ci,1))openCase(ci,1)}
+function openCase(ci,n){if(busy)return;n=Math.min(n,S.cs[ci]);if(n<1)return;
+ busy=true;S.cs[ci]-=n;tab(0);$("res").innerHTML='<div class="spin">🎰</div>';render();
+ setTimeout(()=>{const out=[];
+  for(let i=0;i<n;i++){const it=mk(pick(D[roll(CASES[ci].w)]));S.inv.push(it);out.push(it)}
+  $("res").innerHTML=out.map(i=>`<div class="c drop r${i.r}">${img(i.n)}<b>${i.n}</b><br><small class="t${i.r}">${RN[i.r]}</small><br><small>${f(i.v)}</small></div>`).join("");
+  busy=false;render()},600)}
+function work(){S.m+=300;render()}
+function sell(id){const i=S.inv.findIndex(x=>x.id==id);if(i<0)return;S.m+=price(S.inv[i]);S.inv.splice(i,1);render()}
+function sellAll(){S.inv=S.inv.filter(d=>{if(d.l>0)return true;S.m+=price(d);return false});render()}
+function doUp(d){const c=Math.round(d.v*.4*(d.l+1));if(S.m<c||d.l>=MAXL)return 0;S.m-=c;
+ if(Math.random()<UP[d.l]){d.l++;return 1}return 2}
+function up(id){const d=S.inv.find(x=>x.id==id);if(!d)return;if(doUp(d)==2)alert("Прокачка не удалась 😢 Деньги потеряны");render()}
+function autoUp(){const a=S.inv.filter(d=>d.l<S.auto&&S.m>=Math.round(d.v*.4*(d.l+1))).sort((x,y)=>x.l-y.l||x.v-y.v)[0];
+ if(a){doUp(a);render()}}
+/* трейды */
+function genOne(){const r=Math.floor(Math.random()*5),t=pick(D[r]);return{t,x:Math.round((Math.random()-.4)*.3*t.v)}}
+function genOF(){OF=[0,1,2,3].map(genOne)}
+function trade(i){const o=OF[i],el=$("o"+i);if(!el||!el.value||S.m<o.x)return;
+ const k=S.inv.findIndex(d=>d.id==el.value);if(k<0)return;
+ S.m-=o.x;S.inv.splice(k,1);S.inv.push(mk(o.t));OF[i]=genOne();render()}
+function contract(r){const a=S.inv.filter(d=>d.r==r&&d.l==0);if(a.length<5)return;
+ a.slice(0,5).forEach(d=>S.inv.splice(S.inv.indexOf(d),1));
+ const it=mk(pick(D[r+1]));S.inv.push(it);alert("Контракт: получен "+it.n+" ("+RN[it.r]+")");render()}
+/* бизнес */
+function genCM(){CM=[0,1,2,3,4,5].map(()=>{const c=pick(CARS);return{id:Math.random(),n:c[0],e:c[2],v:c[1],p:Math.round(c[1]*(.55+Math.random()*.55))}})}
+function buyApt(){if(S.m<APT)return;S.m-=APT;S.apt++;render()}
+function sellApt(){if(S.apt<1)return;S.apt--;S.m+=APTS;render()}
+function buyCar(id){const i=CM.findIndex(c=>c.id==id),c=CM[i];if(!c||S.m<c.p)return;S.m-=c.p;S.cars.push({id:S.id++,n:c.n,e:c.e,v:c.v,p:c.p});CM.splice(i,1);render()}
+function sellCar(id){const i=S.cars.findIndex(c=>c.id==id),c=S.cars[i];if(!c)return;const g=Math.round(c.v*(.8+Math.random()*.4));
+ S.m+=g;S.cars.splice(i,1);alert((g>=c.p?"Прибыль ":"Убыток ")+f(g-c.p));render()}
+function showTop(){const t=$("top");if(!t.hidden){t.hidden=true;return}
+ const a=Object.keys(U).map(k=>[k,U[k].s.m+U[k].s.inv.reduce((s,d)=>s+price(d),0)]).sort((x,y)=>y[1]-x[1]).slice(0,10);
+ t.innerHTML="<b>Топ по богатству (деньги + дроны)</b><br>"+a.map((x,i)=>`${i+1}. ${x[0]} — ${f(x[1])}`).join("<br>");t.hidden=false}
+/* мини-игры */
+let hi=null,sc=0;
+function hunt(){if(hi)return;sc=0;let t=10;const ar=$("arena");ar.innerHTML='<button id="tg" class="t" onclick="hit()">🛸</button>';mv();$("hb").disabled=true;$("hs").textContent="Счёт 0 · 10с";
+ hi=setInterval(()=>{t--;mv();$("hs").textContent="Счёт "+sc+" · "+t+"с";
+  if(t<=0){clearInterval(hi);hi=null;ar.innerHTML="";S.m+=sc*150;$("hs").textContent="Готово! Счёт "+sc+", награда "+f(sc*150);$("hb").disabled=false;render()}},1000)}
+function mv(){const g=$("tg");if(!g)return;g.style.left=Math.random()*85+"%";g.style.top=Math.random()*80+"%"}
+function hit(){sc++;mv();$("hs").textContent="Счёт "+sc}
+let rs=0,rt=0,rto=null;
+function react(){const b=$("rb");
+ if(rs==0){rs=1;b.className="r";b.textContent="Жди зелёного…";$("rs").textContent="";
+  rto=setTimeout(()=>{rs=2;rt=Date.now();b.className="g";b.textContent="ЖМИ!"},1000+Math.random()*2500)}
+ else if(rs==1){clearTimeout(rto);rs=0;S.m=Math.max(0,S.m-500);b.className="r";b.textContent="Старт";$("rs").textContent="Фальстарт! −500₽";render()}
+ else{const ms=Date.now()-rt,g=Math.max(100,Math.round(3000-ms*4));rs=0;S.m+=g;b.className="r";b.textContent="Старт";$("rs").textContent=ms+" мс → +"+f(g);render()}}
+/* казино */
+function cres(t){$("cres").innerHTML=t}
+function bet(){const b=Math.floor(+$("bet").value);if(!(b>0)||b>S.m){cres("Неверная ставка 🙅");return 0}S.m-=b;return b}
+function fin(b,k,txt){const w=Math.round(b*k);S.m+=w;cres(txt+"<br>"+(w>0?"<span class='t1'>+"+f(w)+"</span>":"<span class='t4'>−"+f(b)+"</span>"));upd();persist()}
+function slots(){const b=bet();if(!b)return;const s=["🍒","🍋","7️⃣","💎","🛸"],r=[pick(s),pick(s),pick(s)];
+ let k=0;if(r[0]==r[1]&&r[1]==r[2])k=r[0]=="7️⃣"?40:r[0]=="💎"?25:12;else if(r[0]==r[1]||r[1]==r[2]||r[0]==r[2])k=1;
+ fin(b,k,r.join(" "))}
+function flip(){const b=bet();if(!b)return;const w=Math.random()<.48;fin(b,w?2:0,w?"🪙 Повезло!":"🪙 Мимо")}
+function roul(c){const b=bet();if(!b)return;const n=Math.floor(Math.random()*37),col=n==0?"z":n<=18?"r":"b";
+ fin(b,col==c?(c=="z"?14:2):0,"Выпало "+n+" "+(col=="z"?"🟢":col=="r"?"🔴":"⚫"))}
+let ci=null,cm=1,cp=0,cb=0;
+function crash(){if(ci){clearInterval(ci);ci=null;$("cb").textContent="📈 Краш";fin(cb,cm,"Забрал на x"+cm.toFixed(2));return}
+ const b=bet();if(!b)return;cb=b;cm=1;cp=Math.max(1,.96/(1-Math.random()));$("cb").textContent="💸 ЗАБРАТЬ";
+ ci=setInterval(()=>{cm+=.02+cm*.01;if(cm>=cp){clearInterval(ci);ci=null;$("cb").textContent="📈 Краш";cres("💥 Краш на x"+cp.toFixed(2)+"<br><span class='t4'>−"+f(cb)+"</span>");upd();persist()}else cres("📈 x"+cm.toFixed(2))},100)}
+function bonus(){if(Date.now()-S.bt<600000)return;S.bt=Date.now();S.m+=5000;render()}
+let WM=[],WMSG="";const PARTS=["Двигатель","Кузов","Подвеска","Салон"];
+function genWM(){WM=[0,1,2,3].map(()=>{const c=pick(CARS);return{id:Math.random(),n:c[0],e:c[2],v:c[1],p:Math.round(c[1]*(.28+Math.random()*.14)),parts:PARTS.map(n=>({n,c:Math.round(c[1]*(.05+Math.random()*.09)),ok:0}))}})}
+function buyWr(id){const i=WM.findIndex(c=>c.id==id),c=WM[i];if(!c||S.m<c.p)return;S.m-=c.p;c.id=S.id++;S.wr.push(c);WM.splice(i,1);WMSG="Купил "+c.n+" в аварийном состоянии. Чини детали!";render()}
+function fixPart(id,j){const c=S.wr.find(x=>x.id==id),p=c&&c.parts[j];if(!p||p.ok||S.m<p.c)return;S.m-=p.c;
+ if(Math.random()<.85){p.ok=1;WMSG="✅ "+p.n+" починен (−"+f(p.c)+")"}else WMSG="❌ Не получилось починить "+p.n+" (−"+f(p.c)+"), пробуй ещё";render()}
+const wk=c=>c.parts.filter(p=>p.ok).length;
+const wv=c=>c.v*(.3+.7*wk(c)/4);
+function sellWr(id){const i=S.wr.findIndex(x=>x.id==id),c=S.wr[i];if(!c)return;const g=Math.round(wv(c)*(.9+Math.random()*.25)),sp=c.p+c.parts.reduce((a,p)=>a+(p.ok?p.c:0),0);
+ S.m+=g;S.wr.splice(i,1);WMSG="Продал "+c.n+" за "+f(g)+" ("+(g>=sp?"прибыль "+f(g-sp):"убыток "+f(sp-g))+" с учётом ремонта)";render()}
+function WRK(){return `<h2>🔧 Аварийные авто: купи, почини, продай <button class="t" onclick="genWM();render()">Новые лоты</button></h2><div class="grid">`+WM.map(c=>`<div class="c"><div class="e">${c.e}💥</div><b>${c.n}</b><br><small>Цена: ${f(c.p)} · целая ~${f(c.v)}</small><div class="row"><button class="g" onclick="buyWr(${c.id})" ${S.m<c.p?"disabled":""}>Купить</button></div></div>`).join("")+`</div><h2>🛠 Мастерская</h2><div class="top">${WMSG||"Чини детали (шанс 85%) и продавай дороже. Чем больше починено, тем выше цена!"}</div><div class="grid" style="margin-top:8px">`+(S.wr.map(c=>`<div class="c"><div class="e">${c.e}🔧</div><b>${c.n}</b> <small>${wk(c)}/4</small>${c.parts.map((p,j)=>`<div class="row"><span>${p.ok?"✅":"❌"} ${p.n}</span>${p.ok?"":`<button onclick="fixPart(${c.id},${j})" ${S.m<p.c?"disabled":""}>🔧 ${f(p.c)}</button>`}</div>`).join("")}<small>Сейчас продашь ~${f(wv(c))}</small><div class="row"><button class="y" onclick="sellWr(${c.id})">Продать</button></div></div>`).join("")||"<small>Нет машин в ремонте.</small>")+"</div>"}
+function upd(){if(!S)return;$("money").textContent="💰 "+f(S.m)+" · аренда "+f(S.apt*RENT)+"/сек";
+ const w=600000-(Date.now()-S.bt),b=$("bb");b.disabled=w>0;b.textContent=w>0?"🎁 "+Math.ceil(w/1000)+"с":"🎁 Бонус +5 000₽"}
+function render(){if(!S)return;upd();$("who").textContent="👤 "+cur+" · выйти";$("au").value=S.auto;
+ $("shop").innerHTML=CASES.map((c,i)=>`<div class="c"><div class="e">${c.e}</div><b>${c.n}</b><br><small>${f(c.p)}</small>
+ <div class="row"><button onclick="buy(${i},1)" ${S.m<c.p?"disabled":""}>Купить</button><button onclick="buy(${i},5)" ${S.m<c.p*5?"disabled":""}>×5</button>
+ <button class="g" onclick="buyOpen(${i})" ${S.m<c.p||busy?"disabled":""}>Купить и открыть</button></div></div>`).join("");
+ $("mycases").innerHTML=CASES.map((c,i)=>S.cs[i]?`<div class="c"><div class="e">${c.e}</div><b>${c.n}</b> <small>× ${S.cs[i]}</small>
+ <div class="row"><button class="g" onclick="openCase(${i},1)" ${busy?"disabled":""}>Открыть</button><button onclick="openCase(${i},${S.cs[i]})" ${busy||S.cs[i]<2?"disabled":""}>Все</button></div></div>`:"").join("")||"<small>Нет кейсов. Купи в магазине!</small>";
+ const inv=[...S.inv].sort((x,y)=>y.r-x.r||y.l-x.l||y.v-x.v);
+ $("inv").innerHTML=inv.length?inv.map(d=>{const c=Math.round(d.v*.4*(d.l+1));
+ return `<div class="c r${d.r}">${img(d.n)}<b>${d.n}</b> <small>ур.${d.l}</small><br><small class="t${d.r}">${RN[d.r]}</small><br><small>Цена: ${f(price(d))}</small>
+ <div class="row"><button class="g" onclick="sell(${d.id})">Продать</button>
+ <button onclick="up(${d.id})" ${d.l>=MAXL||S.m<c?"disabled":""}>${d.l>=MAXL?"MAX":"⬆ "+f(c)+" ("+UP[d.l]*100+"%)"}</button></div></div>`}).join(""):"<small>Дронов пока нет.</small>";
+ let h="<h2>🔁 Контракты: 5 дронов (ур.0) одной редкости → 1 случайный дрон редкостью выше</h2><div class='grid'>";
+ for(let r=0;r<5;r++){const n=S.inv.filter(d=>d.r==r&&d.l==0).length;
+  h+=`<div class="c r${r}"><b class="t${r}">${RN[r]}</b> → <b class="t${r+1}">${RN[r+1]}</b><br><small>Есть: ${n}/5</small><div class="row"><button onclick="contract(${r})" ${n<5?"disabled":""}>Обменять</button></div></div>`}
+ h+="</div><h2>🤝 Трейдеры <button class='t' onclick='genOF();render()'>Новые офферы</button></h2><div class='grid'>";
+ OF.forEach((o,i)=>{const own=S.inv.filter(d=>d.r==o.t.r&&d.l==0);
+  h+=`<div class="c r${o.t.r}">${img(o.t.n)}<b>${o.t.n}</b><br><small>Стоит ${f(o.t.v)} · ${RN[o.t.r]}</small><br><small>Отдай любой дрон «${RN[o.t.r]}» ур.0, ${o.x>0?"доплата "+f(o.x):o.x<0?"трейдер доплатит "+f(-o.x):"без доплаты"}</small>
+  <select id="o${i}">${own.map(d=>`<option value="${d.id}">${d.n} (${f(d.v)})</option>`).join("")||"<option value=''>нет подходящих</option>"}</select>
+  <button onclick="trade(${i})" ${!own.length||S.m<o.x?"disabled":""}>Обменять</button></div>`});
+ $("s2").innerHTML=h+"</div>";
+ h=`<h2>🏠 Квартиры</h2><div class="c" style="max-width:340px"><div class="e">🏠</div><b>Квартир: ${S.apt}</b><br><small>Каждая даёт ${f(RENT)}/сек аренды</small>
+ <div class="row"><button onclick="buyApt()" ${S.m<APT?"disabled":""}>Купить ${f(APT)}</button><button class="r" onclick="sellApt()" ${S.apt<1?"disabled":""}>Продать +${f(APTS)}</button></div></div>
+ <h2>🚗 Перекуп машин <button class="t" onclick="genCM();render()">Новый рынок</button></h2><div class="grid">`;
+ h+=CM.map(c=>`<div class="c"><div class="e">${c.e}</div><b>${c.n}</b><br><small>Цена: ${f(c.p)} · реально ~${f(c.v)}</small><div class="row"><button class="g" onclick="buyCar(${c.id})" ${S.m<c.p?"disabled":""}>Купить</button></div></div>`).join("");
+ h+="</div><h2>🅿️ Мой гараж</h2><div class='grid'>"+(S.cars.map(c=>`<div class="c"><div class="e">${c.e}</div><b>${c.n}</b><br><small>Куплена за ${f(c.p)}<br>Продажа: ${f(c.v*.8)}–${f(c.v*1.2)}</small><div class="row"><button class="y" onclick="sellCar(${c.id})">Продать</button></div></div>`).join("")||"<small>Гараж пуст. Купи подешевле — продай подороже!</small>")+"</div>";
+ $("s3").innerHTML=h+WRK();persist()}
+setInterval(()=>{if(!S)return;S.m+=S.apt*RENT;tk++;if(S.auto)autoUp();else upd();if(tk%5==0)persist()},1000);
+const last=ld("dc_cur");if(last&&U[last])$("u").value=last;
+</script></body></html>
